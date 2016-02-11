@@ -30,4 +30,4 @@ run_test: deps build update_config
 	docker-compose run --rm $(NAME)_test
 	
 up: deps build update_config
-	docker-compose up -d
+	docker-compose up -d $(NAME)
