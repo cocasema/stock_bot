@@ -1,0 +1,9 @@
+[stock_bot]
+
+[log.logging]
+level = debug
+
+[slack]
+api_token=xoxp-0000000000-0000000000-0000000000-000000
+channel=#test
+username=stockbot
