@@ -1,5 +1,8 @@
 [stock_bot]
 
+[schedule]
+time=13:03
+
 [log.logging]
 level = debug
 

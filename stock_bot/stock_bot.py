@@ -33,7 +33,7 @@ class StockBot(CementApp):
             self.log.warn('Test mode')
 
         self.yahoo_finance = YahooFinance(self.log)
-        self.slack_client = slack.create(False, self.log, self.config)
+        self.slack_client = slack.create(self.test_mode, self.log, self.config)
 
         if not self.test_mode:
             days = [
@@ -43,8 +43,9 @@ class StockBot(CementApp):
                 schedule.every(1).thursday,
                 schedule.every(1).friday,
             ]
+            time = self.config['schedule']['time']
             for day in days:
-                day.at('13:00').do(self.update)
+                day.at(time).do(self.update)
         else:
             schedule.every(10).seconds.do(self.update)
 
