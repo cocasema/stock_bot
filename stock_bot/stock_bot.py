@@ -85,18 +85,21 @@ class StockBot(CementApp):
         except:
             self.log.error(traceback.format_exc())
 
+        self.log_time_of_next_run()
+
     def post_symbol(self, symbol):
         if len(symbol) > 5 or not symbol.isalpha():
             self.log.warn('Symbol string is bad: "{}"', symbol)
             return
         try:
             info = self.yahoo_finance.get_share_info(symbol)
-            start_price = float(info.prev['Close'])
-            end_price = float(info.today['Close'])
-            delta = 100.0 * (end_price / start_price - 1.0)
-            emoji = self.get_emoji(delta)
-            message = '{}*{}* {:.2f} -> {:.2f} ({:+.2f}%)'.format(
-                emoji, symbol, start_price, end_price, delta)
+            if not info:
+                self.log.warn('Skipping symbol "{}"'.format(symbol))
+                return
+
+            emoji = self.get_emoji(float(info.change_percent[:-1]))
+            message = '{}*{}*  {} -> {}  {} ({})'.format(
+                emoji, symbol, info.prev_close, info.price, info.change, info.change_percent)
             self.slack_client.send(message)
 
             # self.slack_client.send_with_image('*{}* {} -> {}'.format(symbol, info.open, info.price),
@@ -110,20 +113,19 @@ class StockBot(CementApp):
             self.log.error(traceback.format_exc())
             self.slack_client.send(
                 'Could\'n get info for symbol "{}"'.format(symbol))
-        self.log_time_of_next_run()
 
     ZERO_EMOJI = ':neutral_face:'
     POS_EMOJI = [
         (+25.0, ':champagne:'),
         (+15.0, ':smiley:'),
         (+5.0, ':thinking_face:'),
-        (+0.0, ':chart_with_upwards_trend:')
+        (+0.0, ':stock_up:')
     ]
     NEG_EMOJI = [
         (-25.0, ':scream:'),
         (-15.0, ':cold_sweat:'),
         (-5.0, ':fearful:'),
-        (-0.0, ':chart_with_downwards_trend:')
+        (-0.0, ':stock_down:')
     ]
 
     def get_emoji(self, delta):
