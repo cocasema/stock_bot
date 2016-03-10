@@ -15,7 +15,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
  && apt-get clean autoclean \
  && rm -rf /var/lib/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 
-COPY ./requirements.txt /tmp
+COPY ./requirements.txt /tmp/
 RUN pip3 install --upgrade pip \
  && pip3 install -r /tmp/requirements.txt \
  && rm -rf /tmp/requirements.txt
