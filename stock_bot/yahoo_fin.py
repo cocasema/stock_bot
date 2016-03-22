@@ -24,6 +24,7 @@ class YahooFinance(object):
     def get_share_info(self, symbol):
 
         share = Share(symbol)
+        self.log.debug(share.data_set)
 
         last_trade_date = share.data_set['LastTradeDate']  # '2/12/2016'
         today = date.today()

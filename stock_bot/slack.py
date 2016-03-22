@@ -68,7 +68,7 @@ class Dummy(object):
         self.log = log
 
     def get_channel_topic(self):
-        return 'goog,VMW\nMSFT'
+        return 'data,pstg,goog,VMW\nMSFT'
 
     def send_with_image(self, message, url, title, title_url):
         self.log.debug('Not sending message to Slack: "{}, {}, {}, {}"'.format(
