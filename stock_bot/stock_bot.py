@@ -16,6 +16,7 @@ from cement.core.foundation import CementApp
 from cement.core.exc import CaughtSignal
 
 from yahoo_fin import YahooFinance
+from google_fin import GoogleFinance
 import slack
 
 
@@ -32,7 +33,10 @@ class StockBot(CementApp):
         if self.test_mode:
             self.log.warn('Test mode')
 
-        self.yahoo_finance = YahooFinance(self.log)
+        provider = self.config[self.Meta.label].get(
+            'provider', 'google').lower()
+        self.provider = {'google': GoogleFinance,
+                         'yahoo': YahooFinance}[provider](self.log)
         self.slack_client = slack.create(self.test_mode, self.log, self.config)
 
         if not self.test_mode:
@@ -92,7 +96,7 @@ class StockBot(CementApp):
             self.log.warn('Symbol string is bad: "{}"', symbol)
             return
         try:
-            info = self.yahoo_finance.get_share_info(symbol)
+            info = self.provider.get_share_info(symbol)
             if not info:
                 self.log.warn('Skipping symbol "{}"'.format(symbol))
                 return

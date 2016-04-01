@@ -1,4 +1,5 @@
 [stock_bot]
+provider = google
 
 [schedule]
 time=13:03
