@@ -4,6 +4,7 @@
 #  Copyright (c) 2016 cocasema
 #
 
+from retrying import retry
 import slacker
 
 
@@ -39,11 +40,13 @@ class Slack(object):
             self.config_params[key] = cfg_section[key]
         self.log.debug('Slack params: {}'.format(self.config_params))
 
+    @retry(stop_max_attempt_number=3)
     def get_channel_topic(self):
         info = self.client.channels.info(self.channel_id).body
         self.log.debug(info)
         return info['channel']['topic']['value']
 
+    @retry(stop_max_attempt_number=3)
     def send_with_image(self, message, url, title, title_url):
         attachment = {'title': title,
                       'title_link': title_url,
@@ -52,6 +55,7 @@ class Slack(object):
                       }
         self.send(message, attachment)
 
+    @retry(stop_max_attempt_number=3)
     def send(self, message, attachment=None):
         self.log.debug('Sending message to Slack')
 
