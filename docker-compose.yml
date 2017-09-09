@@ -5,12 +5,12 @@ stock_bot:
 
   hostname: stock_bot
   domainname: foobar.com
- 
+
   mem_limit: 128m
   memswap_limit: 128m
-   
+
   restart: always
-  
+
   volumes:
    - /etc/localtime:/etc/localtime:ro
    - /data/stock_bot:/etc/stock_bot
@@ -19,4 +19,4 @@ stock_bot_test:
   extends:
     service: stock_bot
   environment:
-   - TEST
+   - TEST=1
