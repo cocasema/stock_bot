@@ -92,9 +92,9 @@ class StockBot(CementApp):
         self.log_time_of_next_run()
 
     def post_symbol(self, symbol):
-        if len(symbol) > 5 or not symbol.isalpha():
-            self.log.warn('Symbol string is bad: "{}"', symbol)
-            return
+        # if len(symbol) > 5 or not symbol.isalpha():
+        #    self.log.warn('Symbol string is bad: "{}"', symbol)
+        #    return
         try:
             info = self.provider.get_share_info(symbol)
             if not info:
