@@ -18,7 +18,7 @@ class YahooFinance(object):
     ShareInfo = namedtuple(
         'ShareInfo', 'prev_close open price change change_percent page_url chart_url')
 
-    def __init__(self, log):
+    def __init__(self, log, options=None):
         self.log = log
 
     def get_share_info(self, symbol):

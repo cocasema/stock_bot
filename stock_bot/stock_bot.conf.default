@@ -1,5 +1,6 @@
 [stock_bot]
-provider = google
+provider = alpha_vantage
+provider_options = key=0000000000
 
 [schedule]
 time=13:03

@@ -15,9 +15,11 @@ import schedule
 from cement.core.foundation import CementApp
 from cement.core.exc import CaughtSignal
 
+import slack
+
 from yahoo_fin import YahooFinance
 from google_fin import GoogleFinance
-import slack
+from alphav_fin import AlphaVantage
 
 
 class StockBot(CementApp):
@@ -34,9 +36,14 @@ class StockBot(CementApp):
             self.log.warn('Test mode')
 
         provider = self.config[self.Meta.label].get(
-            'provider', 'google').lower()
-        self.provider = {'google': GoogleFinance,
-                         'yahoo': YahooFinance}[provider](self.log)
+            'provider', 'alpha_vantage').lower()
+        provider_options = self.config[self.Meta.label].get(
+            'provider_options', '')
+        provider_options = dict(item.split('=') for item in provider_options.split(';'))
+        self.provider = {
+            'google': GoogleFinance,
+            'yahoo': YahooFinance,
+            'alpha_vantage': AlphaVantage}[provider](self.log, provider_options)
         self.slack_client = slack.create(self.test_mode, self.log, self.config)
 
         if not self.test_mode:
