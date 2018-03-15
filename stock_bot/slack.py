@@ -34,7 +34,7 @@ class Slack(object):
         for key in config.keys(self.SECTION):
             if not key in self.CONFIG_PARAMS:
                 if not key in self.SKIP_PARAMS:
-                    self.log.warn(
+                    self.log.warning(
                         'Unknown configuraion parameter "{}.{}"'.format(self.SECTION, key))
                 continue
             self.config_params[key] = cfg_section[key]

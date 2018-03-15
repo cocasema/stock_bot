@@ -33,7 +33,7 @@ class StockBot(CementApp):
 
         self.test_mode = os.getenv('TEST') != None
         if self.test_mode:
-            self.log.warn('Test mode')
+            self.log.warning('Test mode')
 
         provider = self.config[self.Meta.label].get(
             'provider', 'alpha_vantage').lower()
@@ -100,12 +100,12 @@ class StockBot(CementApp):
 
     def post_symbol(self, symbol):
         # if len(symbol) > 5 or not symbol.isalpha():
-        #    self.log.warn('Symbol string is bad: "{}"', symbol)
+        #    self.log.warning('Symbol string is bad: "{}"', symbol)
         #    return
         try:
             info = self.provider.get_share_info(symbol)
             if not info:
-                self.log.warn('Skipping symbol "{}"'.format(symbol))
+                self.log.warning('Skipping symbol "{}"'.format(symbol))
                 return
 
             emoji = self.get_emoji(float(info.change_percent[:-1]))

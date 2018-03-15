@@ -26,7 +26,7 @@ class AlphaVantage(object):
     def get_share_info(self, symbol):
         data, meta_data = self.ts.get_daily(symbol)
 
-        last_trade_date = meta_data['3. Last Refreshed']  # '2017-11-08'
+        last_trade_date = meta_data['3. Last Refreshed'].split()[0]  # '2018-03-14 15:10:45'
         today = date.today().isoformat()
 
         if last_trade_date != today:
