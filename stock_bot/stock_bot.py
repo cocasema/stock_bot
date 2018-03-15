@@ -12,6 +12,8 @@ import traceback
 
 import schedule
 
+from retrying import retry
+
 from cement.core.foundation import CementApp
 from cement.core.exc import CaughtSignal
 
@@ -21,6 +23,10 @@ from yahoo_fin import YahooFinance
 from google_fin import GoogleFinance
 from alphav_fin import AlphaVantage
 
+def retry_if_not_exit(exception):
+    return (not isinstance(exception, KeyboardInterrupt)
+        and not isinstance(exception, SystemExit)
+        and not isinstance(exception, CaughtSignal))
 
 class StockBot(CementApp):
 
@@ -89,8 +95,10 @@ class StockBot(CementApp):
                 symbols = [s.upper() for s in symbols if s]
                 self.log.debug('Symbols (normalized): {}'.format(symbols))
 
-                for symbol in symbols:
-                    self.post_symbol(symbol)
+                for message in [self.query_symbol(symbol) for symbol in symbols]:
+                    if message:
+                        self.slack_client.send(message)
+
         except (KeyboardInterrupt, SystemExit, CaughtSignal):
             raise
         except:
@@ -98,32 +106,35 @@ class StockBot(CementApp):
 
         self.log_time_of_next_run()
 
-    def post_symbol(self, symbol):
+    @retry(stop_max_attempt_number=5,
+           retry_on_exception=retry_if_not_exit,
+           wait_exponential_multiplier=2000,
+           wait_exponential_max=15000)
+    def try_get_share_info(self, symbol):
+        try:
+            return self.provider.get_share_info(symbol)
+        except Exception as e:
+            self.log.warning('Couldn\'t get info for symbol "{}" : {}'.format(symbol, e))
+            raise
+
+    def query_symbol(self, symbol):
         # if len(symbol) > 5 or not symbol.isalpha():
         #    self.log.warning('Symbol string is bad: "{}"', symbol)
         #    return
         try:
-            info = self.provider.get_share_info(symbol)
+            info = self.try_get_share_info(symbol)
             if not info:
                 self.log.warning('Skipping symbol "{}"'.format(symbol))
                 return
 
             emoji = self.get_emoji(float(info.change_percent[:-1]))
-            message = '{}*{}*  {} -> {}  {} ({})'.format(
+            return '{}*{}*  {} -> {}  {} ({})'.format(
                 emoji, symbol, info.prev_close, info.price, info.change, info.change_percent)
-            self.slack_client.send(message)
-
-            # self.slack_client.send_with_image('*{}* {} -> {}'.format(symbol, info.open, info.price),
-            #                            url=info.chart_url,
-            #                            title='details',
-            #                            title_url=info.page_url)
-
         except (KeyboardInterrupt, SystemExit, CaughtSignal):
             raise
         except:
             self.log.error(traceback.format_exc())
-            self.slack_client.send(
-                'Could\'n get info for symbol "{}"'.format(symbol))
+            return ':disappointed: Couldn\'t get info for symbol "{}"'.format(symbol)
 
     ZERO_EMOJI = ':neutral_face:'
     POS_EMOJI = [
@@ -151,7 +162,6 @@ class StockBot(CementApp):
             for v, e in self.NEG_EMOJI:
                 if delta <= v:
                     return e
-
 
 with StockBot() as app:
     try:
